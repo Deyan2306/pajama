@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static dark.cat.utils.PajamaResponses.APPLICATION_STARTED_SUCCESSFULLY;
+import static dark.cat.utils.PajamaResponses.NO_COMPONENT_FOUND_EX;
+
 public class EngineContext {
 
     private final Map<Class<?>, Object> components = new HashMap<>();
@@ -19,7 +22,7 @@ public class EngineContext {
     public EngineContext(String basePackage) throws Exception {
         scanAndInitialize(basePackage);
         injectDependencies();
-        System.out.println("[+] Pajama Application started successfully!");
+        System.out.println(APPLICATION_STARTED_SUCCESSFULLY);
     }
 
     private void scanAndInitialize(String basePackage) throws Exception {
@@ -52,7 +55,7 @@ public class EngineContext {
                     Object dependency = components.get(field.getType());
 
                     if (dependency == null) {
-                        throw new RuntimeException("[-] No component found for: " + field.getType());
+                        throw new RuntimeException(NO_COMPONENT_FOUND_EX + field.getType());
                     }
 
                     field.set(component, dependency);
