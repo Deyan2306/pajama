@@ -7,10 +7,19 @@ import static dark.cat.utils.PajamaResponses.*;
 
 public class PajamaApplication {
 
+    private static EngineContext context;
+
+    public static void run(Class<?> mainClass) throws Exception {
+        context = new EngineContext(".", mainClass);
+        runMainClassOnCurrentContext(mainClass);
+    }
+
     public static void run(Class<?> mainClass, String basePackage) throws Exception {
+        context = new EngineContext(basePackage, mainClass);
+        runMainClassOnCurrentContext(mainClass);
+    }
 
-        EngineContext context = new EngineContext(basePackage);
-
+    private static void runMainClassOnCurrentContext(Class<?> mainClass) {
         Object gameLoop = context.getComponent(mainClass);
 
         if (gameLoop == null || !mainClass.isAnnotationPresent(GameLoop.class)) {
@@ -22,7 +31,6 @@ public class PajamaApplication {
         } else {
             throw new RuntimeException(GAME_LOOP_HAS_NOT_IMPLEMENTED_RUNNABLE.getMessage());
         }
-
     }
 
 }
