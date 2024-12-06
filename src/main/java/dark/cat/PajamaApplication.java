@@ -3,8 +3,7 @@ package dark.cat;
 import dark.cat.annotations.GameLoop;
 import dark.cat.context.EngineContext;
 
-import static dark.cat.utils.PajamaResponses.GAME_LOOP_MUST_IMPLEMENT_RUNNABLE;
-import static dark.cat.utils.PajamaResponses.NO_GAME_LOOP_FOUND;
+import static dark.cat.utils.PajamaResponses.*;
 
 public class PajamaApplication {
 
@@ -15,13 +14,13 @@ public class PajamaApplication {
         Object gameLoop = context.getComponent(mainClass);
 
         if (gameLoop == null || !mainClass.isAnnotationPresent(GameLoop.class)) {
-            throw new RuntimeException(NO_GAME_LOOP_FOUND);
+            throw new RuntimeException(NO_GAME_LOOP_FOUND.getMessage());
         }
 
         if (gameLoop instanceof Runnable) {
             ((Runnable) gameLoop).run();
         } else {
-            throw new RuntimeException(GAME_LOOP_MUST_IMPLEMENT_RUNNABLE);
+            throw new RuntimeException(GAME_LOOP_HAS_NOT_IMPLEMENTED_RUNNABLE.getMessage());
         }
 
     }
