@@ -30,6 +30,8 @@
 
 ---
 
+> [Documentation](/docs)
+
 ## 🚀 Getting Started
 
 ### 📋 Prerequisites
