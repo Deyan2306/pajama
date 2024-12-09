@@ -3,7 +3,9 @@ package dark.cat.context;
 import dark.cat.annotations.EngineComponent;
 import dark.cat.annotations.GameLoop;
 import dark.cat.annotations.Inject;
+import dark.cat.managers.RenderManager;
 import dark.cat.utils.PajamaLogger;
+import dark.cat.utils.ThreadManagerPool;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -64,9 +66,14 @@ public class EngineContext {
      */
     public EngineContext(String basePackage, Class<?> mainClass) throws Exception {
         setMainClass(mainClass);
+        registerPajamaDependencies();
         scanAndInitialize(basePackage);
         injectDependencies();
         PajamaLogger.log(APPLICATION_STARTED_SUCCESSFULLY.getMessage());
+    }
+
+    private void registerPajamaDependencies() {
+        components.put(RenderManager.class, new RenderManager());
     }
 
     /**
@@ -156,6 +163,11 @@ public class EngineContext {
      */
     public Class<?> getMainClass() {
         return mainClass;
+    }
+
+    public void shutdown() {
+        ThreadManagerPool.shutdown();
+        PajamaLogger.log("Engine context shut down gracefully.");
     }
 
     /**
