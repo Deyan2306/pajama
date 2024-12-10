@@ -72,6 +72,9 @@ public class EngineContext {
         PajamaLogger.log(APPLICATION_STARTED_SUCCESSFULLY.getMessage());
     }
 
+    /**
+     * Automatically injects the Pajama dependencies into the map
+     * */
     private void registerPajamaDependencies() {
         components.put(RenderManager.class, new RenderManager());
     }

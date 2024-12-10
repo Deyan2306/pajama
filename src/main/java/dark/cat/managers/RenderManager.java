@@ -96,6 +96,58 @@ public class RenderManager {
     }
 
     /**
+     * Displays the current rendered frame by swapping the buffers.
+     *
+     * Similar to {@link #swapBuffers()}, this method ensures the buffer strategy is utilized
+     * to update the displayed content on the screen.
+     */
+    public void show() {
+        BufferStrategy bufferStrategy = canvas.getBufferStrategy();
+        if (bufferStrategy != null) {
+            bufferStrategy.show();
+        }
+    }
+
+    /**
+     * Clears the screen with a specified color.
+     *
+     * @param graphics the Graphics object used for drawing
+     * @param color    the color to fill the screen with
+     */
+    public void clearScreen(Graphics graphics, Color color) {
+        graphics.setColor(color);
+        graphics.fillRect(0 ,0, getWidth(), getHeight());
+    }
+
+    /**
+     * Calculates the centered position for rendering a string.
+     *
+     * @param graphics the Graphics object used for rendering
+     * @param message  the message to render
+     * @return the position as a Point object
+     */
+    public Point calculateCenteredPosition(Graphics graphics, String message) {
+        graphics.setFont(new Font("Arial", Font.BOLD, 36));
+        FontMetrics metrics = graphics.getFontMetrics();
+        int x = (getWidth() - metrics.stringWidth(message)) / 2;
+        int y = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
+        return new Point(x, y);
+    }
+
+    /**
+     * Draws a message at a specific position.
+     *
+     * @param graphics the Graphics object used for rendering
+     * @param message  the message to render
+     * @param position the position to render the message
+     * @param color    the color of the text
+     */
+    public void drawMessage(Graphics graphics, String message, Point position, Color color) {
+        graphics.setColor(color);
+        graphics.drawString(message, position.x, position.y);
+    }
+
+    /**
      * Cleans up resources associated with the RenderManager and closes the rendering window.
      *
      * Call this method when the application exits to ensure proper resource cleanup.
@@ -125,16 +177,4 @@ public class RenderManager {
         return canvas.getHeight();
     }
 
-    /**
-     * Displays the current rendered frame by swapping the buffers.
-     *
-     * Similar to {@link #swapBuffers()}, this method ensures the buffer strategy is utilized
-     * to update the displayed content on the screen.
-     */
-    public void show() {
-        BufferStrategy bufferStrategy = canvas.getBufferStrategy();
-        if (bufferStrategy != null) {
-            bufferStrategy.show();
-        }
-    }
 }
