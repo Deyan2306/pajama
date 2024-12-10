@@ -158,7 +158,7 @@ This project is licensed under the **Apache License 2.0**. See the [LICENSE](LIC
 
 Have questions or suggestions? Reach out!
 
-- **Email**: [deyan2306@example.com](mailto:deyan.sirakov2006@abv.bg)
+- **Email**: [deyan.sirakov2006@abv.bg](mailto:deyan.sirakov2006@abv.bg)
 - **GitHub Issues**: [Open an Issue](https://github.com/Deyan2306/pajama/issues)
 
 If you enjoy this framework, consider giving the repo a ⭐!
