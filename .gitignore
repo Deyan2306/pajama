@@ -36,4 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Development
 /src/main/java/example
+/records

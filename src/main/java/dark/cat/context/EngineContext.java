@@ -3,6 +3,7 @@ package dark.cat.context;
 import dark.cat.annotations.EngineComponent;
 import dark.cat.annotations.GameLoop;
 import dark.cat.annotations.Inject;
+import dark.cat.annotations.InjectPajamaDependency;
 import dark.cat.managers.RenderManager;
 import dark.cat.utils.PajamaLogger;
 import dark.cat.utils.ThreadManagerPool;
@@ -16,20 +17,18 @@ import static dark.cat.utils.PajamaResponses.APPLICATION_STARTED_SUCCESSFULLY;
 import static dark.cat.utils.PajamaResponses.NO_COMPONENT_FOUND_FOR;
 
 /**
- * The {@code EngineContext} class is responsible for managing the lifecycle of components
- * within the application framework. It acts as the core context that scans, initializes,
- * and wires annotated components, including handling dependency injection.
+ * The {@code EngineContext} class manages the lifecycle of components within the application framework.
+ * It is responsible for scanning, initializing, and wiring components, and handling dependency injection.
  *
- * <p>This class supports:
+ * <p>This class performs the following tasks:
  * <ul>
- *   <li>Scanning a specified package for components annotated with {@link EngineComponent}
- *       or {@link GameLoop}.</li>
- *   <li>Initializing and storing component instances in a managed context.</li>
- *   <li>Injecting dependencies annotated with {@link Inject} into the respective components.</li>
+ *   <li>Scans the specified package for components annotated with {@link EngineComponent} or {@link GameLoop}.</li>
+ *   <li>Instantiates and stores component instances in a managed context.</li>
+ *   <li>Injects dependencies annotated with {@link Inject} and {@link InjectPajamaDependency} into the respective components.</li>
+ *   <li>Registers internal Pajama dependencies that are required by the framework.</li>
  * </ul>
  *
- * <p>On successful initialization, the context logs a message indicating that the
- * application has started successfully.
+ * <p>Upon successful initialization, the context logs a message indicating that the application has started successfully.
  *
  * <p>Usage:
  * <pre>
@@ -52,6 +51,12 @@ public class EngineContext {
     private final Map<Class<?>, Object> components = new HashMap<>();
 
     /**
+     * A map to store and manage internal Pajama instances, where the key is the class type
+     * and the value is the instantiated object. The stored components belong to the Pajama framework.
+     */
+    private final Map<Class<?>, Object> internalPajamaComponents = new HashMap<>();
+
+    /**
      * The main application class, used to derive the parent package for scanning.
      */
     private Class<?> mainClass;
@@ -62,7 +67,7 @@ public class EngineContext {
      *
      * @param basePackage the base package to scan for components
      * @param mainClass the main application class
-     * @throws Exception if an error occurs during scanning or initialization
+     * @throws Exception if an error occurs during scanning, initialization, or dependency injection
      */
     public EngineContext(String basePackage, Class<?> mainClass) throws Exception {
         setMainClass(mainClass);
@@ -73,8 +78,9 @@ public class EngineContext {
     }
 
     /**
-     * Automatically injects the Pajama dependencies into the map
-     * */
+     * Registers internal Pajama dependencies into the {@code internalPajamaComponents} map.
+     * This method is called automatically during initialization.
+     */
     private void registerPajamaDependencies() {
         components.put(RenderManager.class, new RenderManager());
     }
@@ -129,14 +135,27 @@ public class EngineContext {
 
     /**
      * Performs dependency injection by scanning all fields annotated with {@link Inject}
-     * and assigning the corresponding component instances.
+     * and assigning the corresponding component instances. This method also injects internal
+     * Pajama dependencies annotated with {@link InjectPajamaDependency}.
      *
-     * @throws IllegalAccessException if the field cannot be accessed or modified
+     * @throws Exception if the field cannot be accessed or modified, or if the internal dependency
+     *                   injection fails
      */
-    private void injectDependencies() throws IllegalAccessException {
+    private void injectDependencies() throws Exception {
         for (Object component : components.values()) {
             for (Field field : component.getClass().getDeclaredFields()) {
-                if (field.isAnnotationPresent(Inject.class)) {
+                if (field.isAnnotationPresent(InjectPajamaDependency.class)) {
+                    field.setAccessible(true);
+                    injectInternalDependency(field.getType());
+                    Object internalDependency = internalPajamaComponents.get(field.getType());
+
+                    if (internalDependency == null) {
+                        throw new RuntimeException(NO_COMPONENT_FOUND_FOR.getMessage() + field.getType());
+                    }
+
+                    field.set(component, internalDependency);
+
+                } else if (field.isAnnotationPresent(Inject.class)) {
                     field.setAccessible(true);
                     Object dependency = components.get(field.getType());
 
@@ -151,9 +170,23 @@ public class EngineContext {
     }
 
     /**
-     * Sets the main application class.
+     * Injects the internal Pajama dependency into the context if it is not already present.
+     * This method is used to register framework-specific dependencies such as the {@link RenderManager}.
      *
-     * @param mainClass the main class of the application
+     * @param internalDependencyClass the class type of the internal dependency to inject
+     * @throws Exception if the internal dependency cannot be instantiated
+     */
+    private void injectInternalDependency(Class<?> internalDependencyClass) throws Exception {
+        if (!internalPajamaComponents.containsKey(internalDependencyClass)) {
+            PajamaLogger.log("Creating new internal dependency: " + internalDependencyClass.getName());
+            internalPajamaComponents.put(internalDependencyClass, internalDependencyClass.getDeclaredConstructor().newInstance());
+        }
+    }
+
+    /**
+     * Sets the main application class, which is used to derive the package name for scanning.
+     *
+     * @param mainClass the main application class
      */
     private void setMainClass(Class<?> mainClass) {
         this.mainClass = mainClass;
@@ -168,13 +201,17 @@ public class EngineContext {
         return mainClass;
     }
 
+    /**
+     * Shuts down the engine context gracefully, releasing any resources and shutting down the thread pool.
+     */
     public void shutdown() {
         ThreadManagerPool.shutdown();
         PajamaLogger.log("Engine context shut down gracefully.");
     }
 
     /**
-     * Derives the parent package name from the main application class.
+     * Derives the parent package name from the main application class. This is used to scan the
+     * appropriate package for annotated components.
      *
      * @return the parent package name, or an empty string if no package is found
      */
@@ -197,5 +234,4 @@ public class EngineContext {
     public <T> T getComponent(Class<T> clazz) {
         return clazz.cast(components.get(clazz));
     }
-
 }
