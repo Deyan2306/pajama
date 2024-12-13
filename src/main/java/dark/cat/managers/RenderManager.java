@@ -2,10 +2,12 @@ package dark.cat.managers;
 
 import dark.cat.annotations.GameLoop;
 import dark.cat.utils.PajamaLogger;
+import dark.cat.utils.ThreadManagerPool;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.util.function.Consumer;
 
 /**
  * Manages rendering operations, including the creation of a window,
@@ -38,6 +40,16 @@ public class RenderManager {
     private Canvas canvas;
     private BufferStrategy bufferStrategy;
 
+    private int height;
+    private int width;
+    private String title;
+
+    private ThreadManagerPool threadManagerPool;
+
+    public RenderManager() {
+        this.threadManagerPool = new ThreadManagerPool();
+    }
+
     /**
      * Initializes the RenderManager by creating a window and setting up the rendering canvas.
      *
@@ -65,6 +77,35 @@ public class RenderManager {
 
         PajamaLogger.log("RenderManager initialized with dimensions: " + width + "x" + height);
     }
+
+    /**
+     * Initializes the RenderManager by creating a window and setting up the rendering canvas.
+     * Returns the current {@link RenderManager }
+     *
+     */
+    public RenderManager initialize() {
+        frame = new JFrame(title);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
+        frame.setSize(width, height);
+        frame.setLocationRelativeTo(null);
+
+        canvas = new Canvas();
+        canvas.setSize(width, height);
+        canvas.setFocusable(false);
+        frame.add(canvas);
+        frame.pack();
+
+        frame.setVisible(true);
+
+        canvas.createBufferStrategy(3); // Triple buffering for smoother rendering
+        bufferStrategy = canvas.getBufferStrategy();
+
+        PajamaLogger.log("RenderManager initialized with dimensions: " + width + "x" + height);
+        return this;
+    }
+
+
 
     /**
      * Provides a `Graphics` object for rendering operations.
@@ -147,6 +188,16 @@ public class RenderManager {
         graphics.drawString(message, position.x, position.y);
     }
 
+
+    /**
+     * Creates and starts a new thread using the provided thread manager pool callback.
+     *
+     * @param threadManagerPoolConsumer the thread manager pool callback to execute asynchronously
+     */
+    public void newThread(Consumer<ThreadManagerPool> threadManagerPoolConsumer)  {
+        threadManagerPoolConsumer.accept(threadManagerPool);
+    }
+
     /**
      * Cleans up resources associated with the RenderManager and closes the rendering window.
      *
@@ -177,4 +228,45 @@ public class RenderManager {
         return canvas.getHeight();
     }
 
+    /**
+     * Sets the height of the rendering area.
+     *
+     * @param height the height of the rendering area
+     * @return the current instance of the RenderManager
+     */
+    public RenderManager setHeight(int height) {
+        this.height = height;
+        if (frame != null) {
+            frame.setSize(frame.getWidth(), height);
+        }
+        return this;
+    }
+
+    /**
+     * Sets the width of the rendering area.
+     *
+     * @param width the width of the rendering area
+     * @return the current instance of the RenderManager
+     */
+    public RenderManager setWidth(int width) {
+        this.width = width;
+        if (frame != null) {
+            frame.setSize(width, frame.getHeight());
+        }
+        return this;
+    }
+
+    /**
+     * Sets the title of the window.
+     *
+     * @param title the title of the window
+     * @return the current instance of the RenderManager
+     */
+    public RenderManager setTitle(String title) {
+        this.title = title;
+        if (frame != null) {
+            frame.setTitle(title);
+        }
+        return this;
+    }
 }

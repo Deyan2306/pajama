@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * A utility class for managing threads and scheduling tasks in a centralized manner.
@@ -40,7 +41,7 @@ public class ThreadManagerPool {
      *
      * @param task the {@link Runnable} task to execute
      */
-    public static void runAsync(Runnable task) {
+    public void runAsync(Runnable task) {
         threadPool.submit(wrapTask(task));
     }
 
@@ -52,7 +53,7 @@ public class ThreadManagerPool {
      * @param period the time period between successive executions of the task
      * @param timeUnit the {@link TimeUnit} of the delay and period
      */
-    public static void scheduleAtFixedRate(Runnable task, long initialDelay, long period, TimeUnit timeUnit) {
+    public void scheduleAtFixedRate(Runnable task, long initialDelay, long period, TimeUnit timeUnit) {
         scheduler.scheduleAtFixedRate(wrapTask(task), initialDelay, period, timeUnit);
     }
 
@@ -98,5 +99,17 @@ public class ThreadManagerPool {
                 e.printStackTrace();
             }
         };
+    }
+
+    /**
+     * Creates a new thread and executes the provided task asynchronously.
+     *
+     * @param threadConsumer the thread callback to execute asynchronously
+     */
+    public void createNewThread(Consumer<Thread> threadConsumer) {
+        Thread thread = new Thread(() -> {
+            threadConsumer.accept(Thread.currentThread());
+        });
+        threadPool.submit(thread);
     }
 }

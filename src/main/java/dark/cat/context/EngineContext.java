@@ -71,18 +71,9 @@ public class EngineContext {
      */
     public EngineContext(String basePackage, Class<?> mainClass) throws Exception {
         setMainClass(mainClass);
-        registerPajamaDependencies();
         scanAndInitialize(basePackage);
         injectDependencies();
         PajamaLogger.log(APPLICATION_STARTED_SUCCESSFULLY.getMessage());
-    }
-
-    /**
-     * Registers internal Pajama dependencies into the {@code internalPajamaComponents} map.
-     * This method is called automatically during initialization.
-     */
-    private void registerPajamaDependencies() {
-        components.put(RenderManager.class, new RenderManager());
     }
 
     /**

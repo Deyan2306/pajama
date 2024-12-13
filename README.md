@@ -7,26 +7,29 @@
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/Deyan2306/pajama/issues)  
 [![Repo Stars](https://img.shields.io/github/stars/Deyan2306/pajama?style=social)](https://github.com/Deyan2306/pajama/stargazers)
 
-**Pajama Framework** is a lightweight, annotation-based Java framework that simplifies game development by providing intuitive support for dependency injection, lifecycle management, and modular design. With a focus on flexibility and minimal setup, Pajama Framework empowers developers to create robust applications or games with ease.
+**Pajama Framework** is a lightweight, annotation-based Java framework designed to streamline game and application development. By leveraging dependency injection, game lifecycle management, and modular architecture, Pajama helps developers build clean, efficient applications with minimal boilerplate code. The framework is extensible, easy to use, and perfect for small to medium-scale projects.
 
 ---
 
 ## 🎯 Features
 
 - **Annotation-Based Dependency Injection**  
-  Simplify your application's architecture with `@Inject` and `@EngineComponent`.
+  Simplify your application's architecture with `@Inject` and `@EngineComponent` annotations.
 
-- **Custom Game Loop Support**  
-  Build games effortlessly using `@GameLoop` for modular game lifecycle management.
+- **Game Lifecycle Management**  
+  Effortlessly manage game loops and initialization with `@GameLoop` and `EngineContext`.
 
-- **Dynamic Component Discovery**  
-  Automatically scan, discover, and initialize components at runtime.
+- **Render Management**  
+  Integrated `RenderManager` for rendering graphics, clearing the screen, and managing drawing operations with ease.
+
+- **Multi-Threading Support**  
+  Automatically manage thread pools with `ThreadManagerPool` for efficient and scalable task execution.
 
 - **Extensible & Lightweight**  
-  Focus on your application's logic without boilerplate code or unnecessary complexity.
+  Focus on your application logic without unnecessary complexity or boilerplate.
 
 - **Built-in Logging**  
-  Easily log messages or errors with the `PajamaLogger`.
+  Log messages and errors easily with `PajamaLogger`.
 
 ---
 
@@ -46,7 +49,7 @@ To use Pajama Framework, include it in your project dependencies:
 #### Maven
 ```xml
 <dependency>
-    <groupId>dark.cat</groupId>
+    <groupId>io.github.pajama-framework</groupId>
     <artifactId>pajama-framework</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -54,17 +57,17 @@ To use Pajama Framework, include it in your project dependencies:
 
 #### Gradle
 ```groovy
-implementation 'dark.cat:pajama-framework:1.0.0'
+implementation 'io.github.pajama-framework:pajama-framework:1.0.0'
 ```
 
 ---
 
 ## 🛠️ Usage
 
-Here’s how to get started with Pajama Framework in just a few steps:
+Here’s how to get started with Pajama Framework:
 
 1. **Create Components**  
-   Annotate your classes with `@EngineComponent`:
+   Annotate your classes with `@EngineComponent` to define them as components managed by the framework.
    ```java
    @EngineComponent
    public class MyComponent {
@@ -75,11 +78,11 @@ Here’s how to get started with Pajama Framework in just a few steps:
    ```
 
 2. **Inject Dependencies**  
-   Use `@Inject` to link components:
+   Use `@InjectPajamaDependency` to inject components into your classes.
    ```java
    @EngineComponent
    public class MyService {
-       @Inject
+       @InjectPajamaDependency
        private MyComponent myComponent;
 
        public void performAction() {
@@ -89,13 +92,38 @@ Here’s how to get started with Pajama Framework in just a few steps:
    ```
 
 3. **Define a Game Loop**  
-   Add `@GameLoop` to your game class:
+   Use `@GameLoop` to annotate your game class and manage the game lifecycle.
    ```java
    @GameLoop
+   @EngineComponent
    public class MyGame implements Runnable {
+       @InjectPajamaDependency
+       private RenderManager renderManager;
+
        @Override
        public void run() {
-           System.out.println("Game loop running!");
+           renderManager.initialize()
+               .setWidth(800)
+               .setHeight(600)
+               .setTitle("Pajama Game")
+               .newThread(pool -> {
+                   pool.runAsync(() -> {
+                       while (true) {
+                           render();
+                       }
+                   });
+               });
+       }
+
+       private void render() {
+           Optional.ofNullable(renderManager.getGraphics()).ifPresent(graphics -> {
+               renderManager.clearScreen(graphics, Color.BLACK);
+               String message = "Pajama Framework!";
+               Point position = renderManager.calculateCenteredPosition(graphics, message);
+               renderManager.drawMessage(graphics, message, position, Color.WHITE);
+               graphics.dispose();
+               renderManager.show();
+           });
        }
    }
    ```
@@ -121,6 +149,7 @@ src/
 │   │   ├── dark/cat/             # Core framework code
 │   │   ├── dark/cat/annotations/ # Annotations for components and game loop
 │   │   ├── dark/cat/context/     # Engine context and initialization logic
+│   │   ├── dark/cat/managers/    # RenderManager and ThreadManagerPool
 │   │   ├── dark/cat/utils/       # Logging and response utilities
 │   │   └── example/              # Example implementations
 │   └── resources/                # Configuration files (if any)
@@ -130,13 +159,13 @@ src/
 
 ## 🌟 Examples
 
-Explore example projects in the [`examples/`](examples/) directory. Use them as templates for your own projects!
+Check out the [`examples/`](examples/) directory for sample projects using Pajama Framework. These examples serve as templates for your own game or application development.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
+Contributions are welcome! Here’s how you can help:
 
 1. Fork the repository.
 2. Create a new branch: `git checkout -b feature-name`.
