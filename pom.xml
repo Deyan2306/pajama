@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>dark.cat</groupId>
-    <artifactId>pajama-framework</artifactId>
+    <groupId>io.github.pajama-framework</groupId>
+    <artifactId>pajama-core</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>Pajama Framework</name>
     <description>A lightweight Java framework for game development using DI.</description>
-    <url>https://github.com/Deyan2306/pajama</url>
+    <url>https://github.com/pajama-framework/pajama-core</url>
 
     <licenses>
         <license>
@@ -28,15 +28,88 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/Deyan2306/pajama.git</connection>
-        <developerConnection>scm:git:ssh://github.com/Deyan2306/pajama.git</developerConnection>
-        <url>https://github.com/Deyan2306/pajama</url>
+        <connection>scm:git:git://github.com/pajama-framework/pajama-core.git</connection>
+        <developerConnection>scm:git:ssh://github.com/pajama-framework/pajama-core.git</developerConnection>
+        <url>https://github.com/pajama-framework/pajama-core</url>
     </scm>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <build>
+        <plugins>
+            <!-- GPG Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Deploy Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.0.0-M1</version>
+            </plugin>
+
+            <!-- Source and Javadoc Jar Generation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <quiet>true</quiet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/pajama-framework/pajama-core</url>
+        </repository>
+    </distributionManagement>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/pajama-framework/pajama-core</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
