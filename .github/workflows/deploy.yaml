@@ -2,9 +2,8 @@ name: Maven Central Deployment
 
 on:
   push:
-    tags:
-      - '*'  # Triggers the action when you push a new tag (ideal for release versions)
-
+     branches:
+        - master
 jobs:
   deploy:
     runs-on: ubuntu-latest
