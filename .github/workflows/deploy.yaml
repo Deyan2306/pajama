@@ -1,0 +1,32 @@
+name: Maven Central Deployment
+
+on:
+  push:
+    tags:
+      - '*'  # Triggers the action when you push a new tag (ideal for release versions)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up Java (ensure the version matches the one you use in your project)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+        
+      # Set up Maven (ensure Maven is configured if it's not already on your GitHub runner)
+      - name: Set up Maven
+        uses: actions/setup-maven@v2
+
+      # Run Maven Deploy (it will deploy your project to Maven Central or GitHub Packages)
+      - name: Deploy to Maven Central / GitHub Packages
+        run: mvn clean deploy -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
